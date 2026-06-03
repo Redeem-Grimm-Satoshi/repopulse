@@ -29,12 +29,38 @@ java -jar target/repopulse.jar --help
 ## Usage
 
 ```
-java -jar repopulse.jar [repoPath] [-o outputFile]
+java -jar repopulse.jar [repoPath] [options]
 
-  repoPath        directory to scan (default: .)
-  -o, --output    report file to write (default: REPORT.md)
-  -v, --version   print version and exit
-  -h, --help      print help and exit
+  repoPath              directory to scan (default: .)
+  -o, --output <file>   report file to write (default: REPORT.md)
+      --format <fmt>    markdown (default) or json
+      --fail-under <N>  exit 1 if onboarding score is below N (CI gate)
+  -v, --version         print version and exit
+  -h, --help            print help and exit
+```
+
+### Configuration (`.repopulse.yml`)
+
+Drop a `.repopulse.yml` at the repo root to set defaults. Command-line flags
+override it.
+
+```yaml
+output: REPORT.md
+format: markdown        # markdown | json
+failUnder: 70           # fail the run if onboarding score is below this
+exclude:
+  - generated/          # path fragments or globs (e.g. *Generated.java)
+  - legacy/
+```
+
+### CI gating example
+
+```bash
+# Fail the pipeline if repo health regresses below 70/100
+java -jar target/repopulse.jar . --fail-under 70
+
+# Emit machine-readable JSON for a dashboard
+java -jar target/repopulse.jar . --format json -o health.json
 ```
 
 ## Project layout
