@@ -29,14 +29,51 @@ Whether you're maintaining a large legacy service or starting a greenfield proje
 
 The report is written to `REPORT.md` and is regenerated daily by a GitHub Action (see `.github/workflows/daily-pulse.yml`).
 
-## Build & run
+## Getting started — scan your own repository
+
+RepoPulse scans **any** Java project, not just this one. There's nothing to
+install on your project; you build the jar once and point it at your repo.
+
+**Prerequisites:** JDK 17+ (Maven is optional — it's only used to build the jar).
+
+1. Clone this repository and build the runnable jar:
+
+   ```bash
+   git clone https://github.com/Redeem-Grimm-Satoshi/repopulse.git
+   cd repopulse
+   mvn -B package
+   ```
+
+   This produces `target/repopulse.jar` — a single, self-contained file you can copy anywhere.
+
+2. Run it against **your own** project, passing that project's path:
+
+   ```bash
+   java -jar target/repopulse.jar /path/to/your/java/project
+   ```
+
+   On Windows, use the full path, e.g. `java -jar target/repopulse.jar C:\dev\my-service`.
+
+3. Open the generated `REPORT.md` inside your project's folder — that's your health report.
+
+Common variations:
 
 ```bash
-mvn -B package
-java -jar target/repopulse.jar .            # scan current repo, write REPORT.md
-java -jar target/repopulse.jar ../some-repo -o HEALTH.md
+# Write the report somewhere specific
+java -jar target/repopulse.jar /path/to/project -o health-report.md
+
+# Machine-readable JSON for dashboards or scripts
+java -jar target/repopulse.jar /path/to/project --format json -o health.json
+
+# Fail with a non-zero exit code if health is below 70/100 (handy in CI)
+java -jar target/repopulse.jar /path/to/project --fail-under 70
+
+# See all options
 java -jar target/repopulse.jar --help
 ```
+
+No Maven? You can build with the JDK alone: compile `src/main/java` with `javac`
+and run the `io.github.repopulse.RepoPulse` class directly.
 
 ## Usage
 
