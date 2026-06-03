@@ -1,0 +1,61 @@
+name: Daily Pulse
+
+# Regenerates the RepoPulse health report once per day and commits it.
+# Because the report reflects the real state of the repo (and a fresh
+# timestamp), each run produces a meaningful, reviewable change.
+
+on:
+  schedule:
+    # 06:14 UTC daily. Avoid round hours: GitHub delays cron jobs that all
+    # fire on the hour, so an offset minute runs more reliably.
+    - cron: '14 6 * * *'
+  workflow_dispatch:        # lets you trigger it by hand from the Actions tab
+
+permissions:
+  contents: write           # required so the workflow can push the commit
+
+concurrency:
+  group: daily-pulse
+  cancel-in-progress: false
+
+jobs:
+  pulse:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+
+      - name: Build RepoPulse
+        run: mvn -B -q package -DskipTests
+
+      - name: Generate health report
+        run: java -jar target/repopulse.jar . -o REPORT.md
+
+      - name: Commit report if changed
+        env:
+          # IMPORTANT: for the commit to appear on YOUR contribution graph,
+          # this email must be a verified email on your GitHub account.
+          GIT_AUTHOR_NAME: ${{ vars.PULSE_GIT_NAME || github.repository_owner }}
+          GIT_AUTHOR_EMAIL: ${{ vars.PULSE_GIT_EMAIL }}
+        run: |
+          set -euo pipefail
+          if [ -z "${GIT_AUTHOR_EMAIL}" ]; then
+            echo "::error::Set a repository variable PULSE_GIT_EMAIL to a verified email on your GitHub account."
+            exit 1
+          fi
+          git config user.name  "${GIT_AUTHOR_NAME}"
+          git config user.email "${GIT_AUTHOR_EMAIL}"
+          git add REPORT.md
+          if git diff --cached --quiet; then
+            echo "No changes in REPORT.md; nothing to commit."
+          else
+            git commit -m "chore: daily repo health report ($(date -u +%Y-%m-%d))"
+            git push
+          fi

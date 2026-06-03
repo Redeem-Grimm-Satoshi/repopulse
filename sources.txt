@@ -1,0 +1,7 @@
+src/main/java/io/github/repopulse/JavaFileAnalyzer.java
+src/main/java/io/github/repopulse/model/FileMetrics.java
+src/main/java/io/github/repopulse/model/Finding.java
+src/main/java/io/github/repopulse/model/RepoMetrics.java
+src/main/java/io/github/repopulse/RepoPulse.java
+src/main/java/io/github/repopulse/report/MarkdownReport.java
+src/main/java/io/github/repopulse/RepoScanner.java
