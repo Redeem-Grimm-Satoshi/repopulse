@@ -1,0 +1,45 @@
+name: Release
+
+# Cuts a GitHub Release whenever you push a version tag like v1.1.0.
+# Builds the runnable jar, then publishes a release with that jar attached
+# and auto-generated notes. No manual upload needed.
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write          # required to create the release
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+
+      - name: Build jar
+        run: mvn -B package
+
+      - name: Stage release asset
+        run: |
+          set -euo pipefail
+          # Give the asset a versioned name, e.g. repopulse-v1.1.0.jar
+          cp target/repopulse.jar "repopulse-${GITHUB_REF_NAME}.jar"
+
+      - name: Create GitHub release with jar attached
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${GITHUB_REF_NAME}" \
+            "repopulse-${GITHUB_REF_NAME}.jar" \
+            --title "RepoPulse ${GITHUB_REF_NAME}" \
+            --generate-notes
