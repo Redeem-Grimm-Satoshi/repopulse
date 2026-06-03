@@ -8,6 +8,18 @@ It runs on plain JDK (no third-party runtime dependencies), so it's fast, portab
 
 The JetBrains *State of Developer Ecosystem 2025* and Stack Overflow surveys consistently put **repetitive, low-value work** at the top of developer frustrations, with getters/setters, `equals`/`hashCode`, and DTO mapping cited as the most tedious Java boilerplate. RepoPulse surfaces exactly that boilerplate, plus the onboarding gaps that slow new contributors down.
 
+## How it helps Java developers
+
+RepoPulse targets the day-to-day friction Java developers know well:
+
+- **Catch boilerplate before it spreads.** It flags getter/setter-heavy data classes and highlights the ones that could collapse into a Java `record` (16+) or a Lombok-annotated type — turning "this file is 90% ceremony" into a concrete, actionable list.
+- **Onboard to a repo faster.** A single readiness score and checklist (build tool, README, tests, CI, `.gitignore`, license) tells a new contributor — or you, six months later — whether a project is set up to be productive in minutes or hours.
+- **Guard correctness.** It surfaces classic Java footguns such as a class overriding `equals()` but not `hashCode()`, which silently breaks hash-based collections like `HashMap` and `HashSet`.
+- **Enforce standards in CI.** `--fail-under` fails a pull request when repo health regresses, and `--format json` feeds dashboards — so conventions are checked automatically instead of in review comments.
+- **Add zero weight to your build.** It runs on a plain JDK with no third-party runtime dependencies, so it pulls nothing into your dependency tree and starts instantly.
+
+Whether you're maintaining a large legacy service or starting a greenfield project, RepoPulse gives an at-a-glance, trackable read on code health that's specific to Java conventions.
+
 ## What it reports
 
 - **Onboarding readiness score** — build tool, README, tests, CI, `.gitignore`, LICENSE.
@@ -87,10 +99,9 @@ repopulse/
 
 ## Roadmap
 
-- Per-module breakdown for multi-module Maven/Gradle builds.
-- JSON output for machine consumption.
-- Configurable thresholds via `.repopulse.toml`.
-- Optional auto-conversion of record candidates.
+See [ROADMAP.md](ROADMAP.md) for the full 6-month plan. Highlights still ahead:
+AST-based analysis (JavaParser), dependency-freshness checks, multi-module
+support, an HTML report with trends, and a GitHub Marketplace action.
 
 ## License
 
