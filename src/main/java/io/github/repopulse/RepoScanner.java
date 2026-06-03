@@ -20,7 +20,13 @@ public final class RepoScanner {
 
     private final JavaFileAnalyzer analyzer = new JavaFileAnalyzer();
 
+    /** Scans with default configuration (no excludes). */
     public RepoMetrics scan(Path root) {
+        return scan(root, new RepoPulseConfig());
+    }
+
+    /** Scans applying the given configuration's exclude rules. */
+    public RepoMetrics scan(Path root, RepoPulseConfig config) {
         RepoMetrics metrics = new RepoMetrics();
         Path abs = root.toAbsolutePath().normalize();
         metrics.setRootName(abs.getFileName() == null ? "repo" : abs.getFileName().toString());
@@ -31,6 +37,8 @@ public final class RepoScanner {
             paths.filter(Files::isRegularFile)
                     .filter(p -> p.toString().endsWith(".java"))
                     .filter(p -> !isIgnored(root.relativize(p)))
+                    .filter(p -> !config.isExcluded(
+                            root.relativize(p).toString().replace('\\', '/')))
                     .forEach(p -> {
                         try {
                             String content = new String(Files.readAllBytes(p), StandardCharsets.UTF_8);
